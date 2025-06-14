@@ -62,43 +62,46 @@
     window.addEventListener('DOMContentLoaded', () => {
       let records = [];
       let selectedIndex = null;
+      let chart = null;
 
-      const ctx = document.getElementById('weightChart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: '体重 (kg)',
-            data: [],
-            borderColor: 'blue',
-            fill: false,
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const index = context.dataIndex;
-                  const memo = records[index]?.memo || '';
-                  return `体重: ${context.parsed.y}kg\nメモ: ${memo}`;
+      function initChart() {
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [{
+              label: '体重 (kg)',
+              data: [],
+              borderColor: 'blue',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const index = context.dataIndex;
+                    const memo = records[index]?.memo || '';
+                    return `体重: ${context.parsed.y}kg\nメモ: ${memo}`;
+                  }
                 }
               }
-            }
-          },
-          onClick: (e) => {
-            const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-            if (points.length > 0) {
-              const index = points[0].index;
-              selectedIndex = index;
-              showEdit(index);
+            },
+            onClick: (e) => {
+              const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+              if (points.length > 0) {
+                const index = points[0].index;
+                selectedIndex = index;
+                showEdit(index);
+              }
             }
           }
-        }
-      });
+        });
+      }
 
       function addRecord() {
         const date = document.getElementById('date').value;
@@ -128,6 +131,7 @@
       }
 
       function updateChart() {
+        if (!chart) return;
         chart.data.labels = records.map(r => r.date);
         chart.data.datasets[0].data = records.map(r => r.weight);
         chart.update();
@@ -157,15 +161,16 @@
         document.getElementById('input-section').classList.add('hidden');
         document.getElementById('edit-section').classList.add('hidden');
         document.getElementById('list-section').classList.remove('hidden');
+
+        if (!chart) initChart();
+        updateChart();
       }
 
-      // イベントリスナー追加
       document.getElementById('new-record-link').addEventListener('click', (e) => {
         e.preventDefault();
         showInput();
       });
 
-      // 初期表示
       showList();
     });
   </script>

@@ -55,108 +55,119 @@
       <canvas id="weightChart"></canvas>
     </div>
     <div id="record-link" style="margin-top: 10px;"></div>
-    <p><a href="#" class="link-button" onclick="showInput(); return false;">新たに記録</a></p>
+    <p><a href="#" class="link-button" id="new-record-link">新たに記録</a></p>
   </div>
 
   <script>
-    let records = [];
-    let selectedIndex = null;
+    window.addEventListener('DOMContentLoaded', () => {
+      let records = [];
+      let selectedIndex = null;
 
-    const ctx = document.getElementById('weightChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: '体重 (kg)',
-          data: [],
-          borderColor: 'blue',
-          fill: false,
-          tension: 0.1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const index = context.dataIndex;
-                const memo = records[index]?.memo || '';
-                return `体重: ${context.parsed.y}kg\nメモ: ${memo}`;
+      const ctx = document.getElementById('weightChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: '体重 (kg)',
+            data: [],
+            borderColor: 'blue',
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const index = context.dataIndex;
+                  const memo = records[index]?.memo || '';
+                  return `体重: ${context.parsed.y}kg\nメモ: ${memo}`;
+                }
               }
             }
-          }
-        },
-        onClick: (e) => {
-          const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-          if (points.length > 0) {
-            const index = points[0].index;
-            selectedIndex = index;
-            showEdit(index);
+          },
+          onClick: (e) => {
+            const points = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+            if (points.length > 0) {
+              const index = points[0].index;
+              selectedIndex = index;
+              showEdit(index);
+            }
           }
         }
-      }
-    });
+      });
 
-    function addRecord() {
-      const date = document.getElementById('date').value;
-      const weight = parseFloat(document.getElementById('weight').value);
-      const memo = document.getElementById('memo').value;
+      function addRecord() {
+        const date = document.getElementById('date').value;
+        const weight = parseFloat(document.getElementById('weight').value);
+        const memo = document.getElementById('memo').value;
 
-      if (!date || isNaN(weight)) {
-        alert('日付と体重は必須です');
-        return;
-      }
+        if (!date || isNaN(weight)) {
+          alert('日付と体重は必須です');
+          return;
+        }
 
-      records.push({ date, weight, memo });
-      updateChart();
-      showList();
-    }
-
-    function updateRecord() {
-      const date = document.getElementById('edit-date').value;
-      const weight = parseFloat(document.getElementById('edit-weight').value);
-      const memo = document.getElementById('edit-memo').value;
-
-      if (selectedIndex !== null) {
-        records[selectedIndex] = { date, weight, memo };
+        records.push({ date, weight, memo });
         updateChart();
         showList();
       }
-    }
 
-    function updateChart() {
-      chart.data.labels = records.map(r => r.date);
-      chart.data.datasets[0].data = records.map(r => r.weight);
-      chart.update();
-    }
+      function updateRecord() {
+        const date = document.getElementById('edit-date').value;
+        const weight = parseFloat(document.getElementById('edit-weight').value);
+        const memo = document.getElementById('edit-memo').value;
 
-    function showInput() {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('date').value = today;
-      document.getElementById('weight').value = '';
-      document.getElementById('memo').value = '';
-      document.getElementById('input-section').classList.remove('hidden');
-      document.getElementById('edit-section').classList.add('hidden');
-      document.getElementById('list-section').classList.add('hidden');
-    }
+        if (selectedIndex !== null) {
+          records[selectedIndex] = { date, weight, memo };
+          updateChart();
+          showList();
+        }
+      }
 
-    function showEdit(index) {
-      const record = records[index];
-      document.getElementById('edit-date').value = record.date;
-      document.getElementById('edit-weight').value = record.weight;
-      document.getElementById('edit-memo').value = record.memo;
-      document.getElementById('input-section').classList.add('hidden');
-      document.getElementById('edit-section').classList.remove('hidden');
-      document.getElementById('list-section').classList.add('hidden');
-    }
+      function updateChart() {
+        chart.data.labels = records.map(r => r.date);
+        chart.data.datasets[0].data = records.map(r => r.weight);
+        chart.update();
+      }
 
-    function showList() {
-      document.getElementById('input-section').classList.add('hidden');
-      document.getElementById('edit-section').classList.add('hidden');
-      document.getElementById('list-section').classList.remove('hidden');
-    }
+      function showInput() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        document.getElementById('weight').value = '';
+        document.getElementById('memo').value = '';
+        document.getElementById('input-section').classList.remove('hidden');
+        document.getElementById('edit-section').classList.add('hidden');
+        document.getElementById('list-section').classList.add('hidden');
+      }
+
+      function showEdit(index) {
+        const record = records[index];
+        document.getElementById('edit-date').value = record.date;
+        document.getElementById('edit-weight').value = record.weight;
+        document.getElementById('edit-memo').value = record.memo;
+        document.getElementById('input-section').classList.add('hidden');
+        document.getElementById('edit-section').classList.remove('hidden');
+        document.getElementById('list-section').classList.add('hidden');
+      }
+
+      function showList() {
+        document.getElementById('input-section').classList.add('hidden');
+        document.getElementById('edit-section').classList.add('hidden');
+        document.getElementById('list-section').classList.remove('hidden');
+      }
+
+      // イベントリスナー追加
+      document.getElementById('new-record-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showInput();
+      });
+
+      // 初期表示
+      showList();
+    });
   </script>
 </body>
 </html>

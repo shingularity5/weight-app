@@ -138,13 +138,14 @@
       }
 
       function showInput() {
+        document.getElementById('input-section').classList.remove('hidden');
+        document.getElementById('edit-section').classList.add('hidden');
+        document.getElementById('list-section').classList.add('hidden');
+
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').value = today;
         document.getElementById('weight').value = '';
         document.getElementById('memo').value = '';
-        document.getElementById('input-section').classList.remove('hidden');
-        document.getElementById('edit-section').classList.add('hidden');
-        document.getElementById('list-section').classList.add('hidden');
       }
 
       function showEdit(index) {
